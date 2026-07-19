@@ -90,6 +90,8 @@ Material:
     m_Floats:
     - REQUIRE_DEPTH_TEXTURE: 1
     - REQUIRE_OPAQUE_TEXTURE: 1
+    - _AcuteDepthThreshold: 0.6
+    - _AcuteStartDot: 26.78
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
     - _AlphaToMask: 0
@@ -98,9 +100,9 @@ Material:
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
-    - _ColorStrength: 4.71
+    - _ColorStrength: 1.18
     - _ColorThickness: 1
-    - _ColorThreshold: 1.19
+    - _ColorThreshold: 4.8
     - _Cull: 2
     - _Cutoff: 0.5
     - _DepthStrength: 1
@@ -115,6 +117,12 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _Metallic: 0
+    - _NormalAdjustFarDepth: 18
+    - _NormalAdjustNearDepth: 5
+    - _NormalFarThreshold: 30
+    - _NormalStrength: 1
+    - _NormalThickness: 23.1
+    - _NormalThreshold: 0.56
     - _OcclusionStrength: 1
     - _Parallax: 0.005
     - _QueueOffset: 0
@@ -125,7 +133,7 @@ Material:
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 0
-    - _Thickness: 2
+    - _Thickness: 4
     - _WorkflowMode: 1
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1

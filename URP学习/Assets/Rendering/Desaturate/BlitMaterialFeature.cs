@@ -64,6 +64,8 @@ public class BlitMaterialFeature : ScriptableRendererFeature
         public Material material;
         public int materialpassIndex = 0; // -1代表渲染所有pass
         public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingOpaques;
+        [Tooltip("Global texture names sampled by the material, for example _DepthNormalsTexture.")]
+        public string[] globalTextureDependencies = Array.Empty<string>();
     }
 
     class BlitMaterialFeaturePass : ScriptableRenderPass
@@ -92,11 +94,17 @@ public class BlitMaterialFeature : ScriptableRendererFeature
         // It is used to execute draw commands.
         static void ExecutePass(PassData data, RasterGraphContext context)
         {
-            
+            /*
+             * 未在RecordRenderGraph中进行以下显式注册的ExecutePass不会被调用
+             * builder.SetRenderFunc(
+                (PassData data, RasterGraphContext context) =>ExecutePass(data, context));
+             */
         }
 
         // RecordRenderGraph is where the RenderGraph handle can be accessed, through which render passes can be added to the graph.
         // FrameData is a context container through which URP resources can be accessed and managed.
+        // RecordRenderGraph 本身只负责声明资源和渲染依赖，但是在此使用了renderGraph.AddBlitPass为高级封装，
+        // 其内部已经隐式实现ExecutePass相关内容，所以只需要Blit时不用自己显式实现ExecutePass。
         public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
         {
             if (material == null)
@@ -127,7 +135,27 @@ public class BlitMaterialFeature : ScriptableRendererFeature
                 materialpassIndex
             );
 
-            renderGraph.AddBlitPass(blitToTemp, "Desaturate Blit To Temp");
+            using (var builder = renderGraph.AddBlitPass(
+                blitToTemp,
+                $"{name} Blit To Temp",
+                returnBuilder: true))
+            {
+                string[] dependencies = settings.globalTextureDependencies;
+
+                if (dependencies != null)
+                {
+                    foreach (string textureName in dependencies)
+                    {
+                        if (!string.IsNullOrWhiteSpace(textureName))
+                        {
+                            builder.UseGlobalTexture(
+                                Shader.PropertyToID(textureName),
+                                AccessFlags.Read
+                            );
+                        }
+                    }
+                }
+            }
 
             var blitBack = new RenderGraphUtils.BlitMaterialParameters(
                 temp,
@@ -136,7 +164,7 @@ public class BlitMaterialFeature : ScriptableRendererFeature
                 0
             );
 
-            renderGraph.AddBlitPass(blitBack, "Copy Back");
+            renderGraph.AddBlitPass(blitBack, $"{name} Copy Back");
         }
     }
 }

@@ -2,6 +2,11 @@
 #ifndef SOBELOUTLINES_INCLUDED
 #define SOBELOUTLINES_INCLUDED
 
+#include "DecodeDepthNormals.hlsl"
+
+//声明深度法线纹理和采样器的变量
+TEXTURE2D(_DepthNormalsTexture);
+SAMPLER(sampler_DepthNormalsTexture);
 
 //sobel卷积矩阵：在水平和垂直方向的每个像素及周围采样值乘以权重，将各自相加后的两个结果作为一个二维向量，取模长得到边缘值
 //采样点相对中心像素偏移量
@@ -21,7 +26,7 @@ static float sobelXMatrix[9]={
 //y方向权重
 static float sobelYMatrix[9]={
     1, 2, 1,
-    0, 0, 0, 
+    0, 0, 0,
     -1, -2, -1
 };
 
@@ -64,7 +69,7 @@ void ColorSobel_float(float2 UV, float Thickness, out float Out)
 
         //计算权重
         float2 kernel = float2(sobelXMatrix[i], sobelYMatrix[i]);
-   
+
         sobelR += rgb.r * kernel;
         sobelG += rgb.g * kernel;
         sobelB += rgb.b * kernel;
@@ -72,10 +77,64 @@ void ColorSobel_float(float2 UV, float Thickness, out float Out)
     }
 
     Out = max(
-                length(sobelR), 
+                length(sobelR),
                 max(length(sobelG), length(sobelB))
              );
 }
 
+// 采样深度法线纹理，将返回值解析为深度和法线向量
+void GetDepthAndNormal(float2 uv, out float depth, out float3 normal)
+{
+    float4 coded = SAMPLE_TEXTURE2D(_DepthNormalsTexture, sampler_DepthNormalsTexture, uv);
+    DecodeDepthNormal(coded, depth, normal);
+}
+
+// 包装函数，将GetDepthAndNormal的 0到1 映射至 -1到1
+void CalculateDepthNormal_float(float2 UV, out float Depth, out float3 Normal)
+{
+    GetDepthAndNormal(UV, Depth, Normal);
+    Normal = Normal * 2 - 1;
+}
+
+// 法线sobel
+void NormalSobel_float(float2 UV, float Thickness, out float Out)
+{
+    float2 sobelX = 0.0;
+    float2 sobelY = 0.0;
+    float2 sobelZ = 0.0;
+
+    [unroll] for (int i = 0; i < 9; i++)
+    {
+        float depth;
+        float3 normal;
+
+        //本轮采样点
+        //将像素精确到屏幕的单个像素
+        float2 offset = sobelSamplePoints[i] * Thickness / _ScreenParams.xy;
+        GetDepthAndNormal(UV + offset, depth, normal);
+
+        //计算权重
+        float2 kernel = float2(sobelXMatrix[i], sobelYMatrix[i]);
+
+        sobelX += normal.x * kernel;
+        sobelY += normal.y * kernel;
+        sobelZ += normal.z * kernel;
+
+    }
+
+    Out = max(
+                length(sobelX),
+                max(length(sobelY), length(sobelZ))
+             );
+}
+
+// 屏幕UV转视图空间
+void ViewDirectionFromScreenUV_float(float2 In, out float3 Out)
+{
+    // 视图空间转裁剪空间逆矩阵
+    float2 p11_22 = float2(unity_CameraProjection._11, unity_CameraProjection._22);
+    // 取反使方向朝向摄像机
+    Out = -normalize(float3((In * 2 - 1) / p11_22, -1));
+}
 
 #endif

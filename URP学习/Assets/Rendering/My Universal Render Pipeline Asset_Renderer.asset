@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2211c88afbb74b14d958ba27f559f0e2, type: 3}
   m_Name: Desaturate
   m_EditorClassIdentifier: Assembly-CSharp::NewURPRenderFeature
-  m_Active: 1
+  m_Active: 0
   settings:
     material: {fileID: 2100000, guid: 377267a3126f1ff4db2e0015640acb43, type: 2}
     materialpassIndex: 0
     renderPassEvent: 600
+    globalTextureDependencies: []
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -45,7 +46,9 @@ MonoBehaviour:
   - {fileID: 7196402379916383008}
   - {fileID: -3048712943079081297}
   - {fileID: 7757412798440228868}
-  m_RendererFeatureMap: 2013b11bd6c1de63afbaa225bbcbb0d5044819f3d6dda76b
+  - {fileID: 1896682671569694837}
+  - {fileID: 7885154924285911061}
+  m_RendererFeatureMap: 2013b11bd6c1de63afbaa225bbcbb0d5044819f3d6dda76b75f08c3ad75e521a15e0fb54a0b26d6d
   m_UseNativeRenderPass: 0
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 055dbd4b0908593478e4703672042356, type: 2}
@@ -74,6 +77,19 @@ MonoBehaviour:
   m_DepthTextureFormat: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &1896682671569694837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed686d1bbdb70a84fabe0cd75826a00a, type: 3}
+  m_Name: DepthNormalsFeature
+  m_EditorClassIdentifier: Assembly-CSharp::DepthNormalsFeature
+  m_Active: 1
 --- !u!114 &7196402379916383008
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -133,3 +149,23 @@ MonoBehaviour:
     material: {fileID: 2100000, guid: e42db7766639b344396868b44b513b8b, type: 2}
     materialpassIndex: 0
     renderPassEvent: 450
+    globalTextureDependencies: []
+--- !u!114 &7885154924285911061
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2211c88afbb74b14d958ba27f559f0e2, type: 3}
+  m_Name: TestDepthNormal
+  m_EditorClassIdentifier: Assembly-CSharp::BlitMaterialFeature
+  m_Active: 0
+  settings:
+    material: {fileID: -876546973899608171, guid: c068ef16a42469e4e89895256228d2e4, type: 3}
+    materialpassIndex: 0
+    renderPassEvent: 300
+    globalTextureDependencies:
+    - _DepthNormalsTexture
